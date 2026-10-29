@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JARVIS</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#030916;color:#8cecff;
+font-family:Arial,sans-serif;text-align:center;min-height:100vh;
+display:flex;align-items:center;justify-content:center}
+main{width:100%;max-width:440px;padding:24px}
+h1{letter-spacing:8px;font-size:27px}
+#status{color:#65a9d5;font-size:12px;letter-spacing:3px}
+.reactor{width:220px;height:220px;margin:30px auto;
+border:2px solid #27cfff;border-radius:50%;display:grid;
+place-items:center;position:relative;
+box-shadow:0 0 25px #078ccf,inset 0 0 25px #078ccf}
+.reactor:before,.reactor:after{content:"";position:absolute;
+border:1px solid #36cfff;border-radius:50%}
+.reactor:before{inset:18px}
+.reactor:after{inset:40px}
+.core{width:65px;height:65px;border-radius:50%;
+background:#b8faff;box-shadow:0 0 35px #18cfff}
+.listening{animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.07);
+box-shadow:0 0 45px #28dfff}}
+#log{min-height:55px;line-height:1.5;color:#d4f8ff}
+input{width:100%;padding:14px;border-radius:12px;
+border:1px solid #168cba;background:#09182a;color:white;
+font-size:16px}
+button{padding:13px 18px;margin:7px 3px;border-radius:22px;
+border:1px solid #29cfff;background:#082743;color:#9cefff;
+font-size:15px}
+button:active{background:#12638a}
+small{color:#6488a6}
+</style>
+</head>
+<body>
+<main>
+<div id="status">SYSTEM ONLINE</div>
+<h1>J.A.R.V.I.S.</h1>
+<div class="reactor" id="reactor"><div class="core"></div></div>
+<div id="log">JARVIS hazır. Size nasıl yardımcı olabilirim?</div>
+<p><input id="cmd" placeholder="Jarvis'e bir komut yaz..."></p>
+<button onclick="ask()">GÖNDER</button>
+<button onclick="listen()">🎙 KONUŞ</button>
+<p><small>MARK 1 · PERSONAL ASSISTANT</small></p>
+</main>
+<script>
+const log=document.getElementById('log');
+const cmd=document.getElementById('cmd');
+function say(t){
+ log.textContent=t;
+ if('speechSynthesis' in window){
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);
+  u.lang='tr-TR';
+  speechSynthesis.speak(u);
+ }
+}
+function ask(){
+ const q=cmd.value.trim().toLocaleLowerCase('tr-TR');
+ if(!q)return;
+ if(q.includes('merhaba'))say('Merhaba. JARVIS sistemleri hazır.');
+ else if(q.includes('saat'))say('Saati iPhone ekranından kontrol edebilirsiniz. Şu an '+new Date().toLocaleTimeString('tr-TR')+'.');
+ else if(q.includes('tarih'))say('Bugünün tarihi '+new Date().toLocaleDateString('tr-TR')+'.');
+ else if(q.includes('adın'))say('Ben JARVIS. Kişisel asistan prototipiniz.');
+ else if(q.includes('nasılsın'))say('Tüm sistemler çalışır durumda. Teşekkür ederim.');
+ else if(q.includes('yardım'))say('Merhaba, saat, tarih veya nasılsın diye sorabilirsiniz.');
+ else say('Komut alındı. Bu ücretsiz demo henüz gerçek bir yapay zekâya bağlı değil.');
+ cmd.value='';
+}
+function listen(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){say('Bu tarayıcı ses tanımayı desteklemiyor. Lütfen komutunuzu yazın.');return;}
+ const r=new SR();r.lang='tr-TR';r.interimResults=false;
+ document.getElementById('reactor').classList.add('listening');
+ document.getElementById('status').textContent='DİNLİYOR';
+ r.onresult=e=>{cmd.value=e.results[0][0].transcript;ask();};
+ r.onerror=()=>{log.textContent='Mikrofon iznini ve internet bağlantısını kontrol edin.';};
+ r.onend=()=>{document.getElementById('reactor').classList.remove('listening');document.getElementById('status').textContent='SYSTEM ONLINE';};
+ try{r.start();}catch(e){say('Mikrofon şu anda kullanılamıyor.');}
+}
+cmd.addEventListener('keydown',e=>{if(e.key==='Enter')ask();});
+</script>
+</body>
+</html>
