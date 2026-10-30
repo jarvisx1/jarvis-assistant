@@ -203,9 +203,12 @@ function saveMemory(text){
 
  if(!value)return;
 
- const exists = memories.some(
-  item => normalize(item) === normalize(value)
- );
+ const clean = str => normalize(str)
+  .replace(/[.,!?;:]/g,"")
+  .replace(/\s+/g," ")
+  .trim();
+
+ const exists = memories.some(item => clean(item) === clean(value));
 
  if(exists){
   const cevap="Efendim, bu bilgi zaten hafızamda kayıtlı.";
@@ -214,6 +217,15 @@ function saveMemory(text){
   input.value="";
   return;
  }
+
+ memories.push(value);
+ saveMemories();
+ input.value="";
+
+ const cevap="Elbette Efendim. "+value+" bilgisini hafızama kaydettim.";
+ showResponse(cevap);
+ speak(cevap);
+}
 
  memories.push(value);
  saveMemories();
