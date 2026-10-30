@@ -316,19 +316,27 @@ function handleCommand(raw){
   return;
  }
 
- if(command.startsWith("hatırla ")){
-  saveMemory(raw.substring(raw.toLocaleLowerCase("tr-TR").indexOf("hatırla")+7).trim());
-  return;
- }
+const memoryMatch = raw.match(/(?:bunu\s+)?hatırla\b\s*[:,-]?\s*(.+)/i);
 
- if(command.includes("ne hatırlıyorsun") || command.includes("hafızanda ne var")){
-  if(!memories.length){
-   speak("Henüz kayıtlı bir bilgim yok, Efendim.");
+if(memoryMatch){
+  const bilgi = memoryMatch[1].trim();
+
+  if(bilgi){
+    saveMemory(bilgi);
   }else{
-   speak("Hatırladığım bilgiler: "+memories.join(". "));
+    speak("Efendim, neyi hatırlamamı istediğinizi söyleyin.");
   }
   return;
- }
+}
+
+if(command.includes("ne hatırlıyorsun") || command.includes("hafızanda ne var")){
+  if(!memories.length){
+    speak("Henüz kayıtlı bir bilgim yok, Efendim.");
+  }else{
+    speak("Hatırladığım bilgiler: "+memories.join(". "));
+  }
+  return;
+}
 
  if(command.startsWith("görev ekle ")){
   addTask(raw.substring(raw.toLocaleLowerCase("tr-TR").indexOf("görev ekle")+11).trim());
