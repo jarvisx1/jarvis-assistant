@@ -276,7 +276,12 @@ function normalize(text){
 function sendTextCommand(){
   const input = document.getElementById("textCommand");
   const command = input.value.trim();
-  if(!command) return;
+
+  if(!command) {
+    showResponse("Efendim, lütfen bir komut yazın.");
+    return;
+  }
+
   input.value = "";
   handleCommand(command);
 }
