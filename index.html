@@ -273,6 +273,13 @@ function normalize(text){
  .trim();
 }
 
+function sendTextCommand(){
+  const input = document.getElementById("textCommand");
+  const command = input.value.trim();
+  if(!command) return;
+  input.value = "";
+  handleCommand(command);
+}
 function handleCommand(raw){
  const command=normalize(raw);
  if(!command)return;
