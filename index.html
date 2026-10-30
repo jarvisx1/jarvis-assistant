@@ -68,6 +68,12 @@ li{padding:8px 0;border-bottom:1px solid #173449}
 <div class="status" id="status">Sistem hazır, Efendim.</div>
 
 <div id="response">Size nasıl yardımcı olabilirim?</div>
+ 
+<div>
+  <input id="textCommand" placeholder="Efendim, komutunuzu yazın..."
+         onkeydown="if(event.key==='Enter') sendTextCommand()">
+  <button onclick="sendTextCommand()">GÖNDER</button>
+</div>
 
 <div>
 <button class="primary" onclick="toggleWake()" id="wakeBtn">
