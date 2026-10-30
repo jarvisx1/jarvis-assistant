@@ -200,7 +200,20 @@ function completeTask(index){
 function saveMemory(text){
  const input=document.getElementById("memoryInput");
  const value=(text || input.value).trim();
+
  if(!value)return;
+
+ const exists = memories.some(
+  item => normalize(item) === normalize(value)
+ );
+
+ if(exists){
+  const cevap="Efendim, bu bilgi zaten hafızamda kayıtlı.";
+  showResponse(cevap);
+  speak(cevap);
+  input.value="";
+  return;
+ }
 
  memories.push(value);
  saveMemories();
@@ -209,6 +222,7 @@ function saveMemory(text){
  const cevap="Elbette Efendim. "+value+" bilgisini hafızama kaydettim.";
  showResponse(cevap);
  speak(cevap);
+}
 }
 function clearMemory(){
  if(!confirm("Bütün hafıza kayıtları silinsin mi?"))return;
