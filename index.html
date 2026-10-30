@@ -1,190 +1,494 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#030916">
-<title>J.A.R.V.I.S. — Kişisel Asistan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050b18">
+<title>JARVIS MARK 3</title>
+
 <style>
 *{box-sizing:border-box}
-:root{color-scheme:dark}
-body{margin:0;background:radial-gradient(circle at 50% 35%,#08213a 0,#030916 58%);color:#8cecff;
-font-family:Arial,sans-serif;text-align:center;min-height:100vh;display:flex;align-items:center;justify-content:center}
-main{width:100%;max-width:480px;padding:24px 20px 30px}
-h1{letter-spacing:7px;font-size:27px;margin:12px 0}
-#status{color:#65a9d5;font-size:12px;letter-spacing:3px}
-.reactor{width:210px;height:210px;margin:28px auto;border:2px solid #27cfff;border-radius:50%;display:grid;place-items:center;position:relative;box-shadow:0 0 25px #078ccf,inset 0 0 25px #078ccf}
-.reactor:before,.reactor:after{content:"";position:absolute;border:1px solid #36cfff;border-radius:50%}
-.reactor:before{inset:18px}.reactor:after{inset:40px}
-.core{width:65px;height:65px;border-radius:50%;background:#b8faff;box-shadow:0 0 35px #18cfff}
-.listening{animation:pulse 1s infinite}
-@keyframes pulse{50%{transform:scale(1.07);box-shadow:0 0 45px #28dfff}}
-#log{min-height:54px;line-height:1.5;color:#d4f8ff;margin:10px 0 16px}
-input{width:100%;padding:14px;border-radius:12px;border:1px solid #168cba;background:#09182a;color:white;font-size:16px;outline:none}
-input:focus{border-color:#8cecff;box-shadow:0 0 0 2px #168cba55}
-button{padding:12px 16px;margin:7px 3px;border-radius:22px;border:1px solid #29cfff;background:#082743;color:#9cefff;font-size:14px;cursor:pointer}
-button:active{background:#12638a}
-button:focus-visible{outline:2px solid white;outline-offset:2px}
-.small{color:#6488a6;font-size:12px;line-height:1.5}
-.panel{margin:20px 0 0;padding:14px;border:1px solid #145273;border-radius:14px;background:#061426cc;text-align:left}
-.panel h2{font-size:13px;letter-spacing:2px;margin:0 0 10px;color:#8cecff}
-#taskList,#memoryList{padding-left:20px;margin:0;color:#c9f5ff;font-size:14px;line-height:1.7}
-#taskList li.done{text-decoration:line-through;opacity:.55}
-.hidden{display:none}
-.footer{margin-top:18px;color:#6488a6;font-size:10px;letter-spacing:2px}
-@media(max-width:360px){.reactor{width:180px;height:180px}h1{font-size:23px;letter-spacing:5px}main{padding:18px 14px}}
+body{
+ margin:0;background:#050b18;color:#d9f5ff;
+ font-family:Arial,sans-serif;text-align:center;
+ min-height:100vh;padding:20px;
+}
+h1{color:#35d9ff;letter-spacing:5px;margin-top:25px}
+.subtitle{color:#789eae;font-size:13px}
+.reactor{
+ width:190px;height:190px;border:3px solid #21cfff;
+ border-radius:50%;margin:35px auto;
+ display:flex;align-items:center;justify-content:center;
+ box-shadow:0 0 25px #00bfff, inset 0 0 25px #00bfff;
+ animation:pulse 3s infinite;
+}
+.core{
+ width:90px;height:90px;border-radius:50%;
+ background:#18bfff;box-shadow:0 0 35px #18bfff;
+}
+@keyframes pulse{
+ 50%{box-shadow:0 0 45px #00cfff,inset 0 0 40px #00cfff}
+}
+.status{color:#42dfff;margin:15px;font-size:15px}
+button{
+ background:#082b42;color:#48dfff;
+ border:1px solid #16bce9;border-radius:12px;
+ padding:14px 18px;margin:6px;font-size:14px;
+ cursor:pointer;
+}
+button:active{background:#075477}
+.primary{background:#075477}
+.stop{border-color:#ff5c70;color:#ff8794}
+.panel{
+ background:#09182a;border:1px solid #16445d;
+ border-radius:15px;padding:17px;margin:18px auto;
+ max-width:550px;text-align:left;
+}
+.panel h3{color:#39d8ff;margin-top:0}
+input{
+ width:100%;padding:13px;border-radius:9px;
+ border:1px solid #24617c;background:#06111f;
+ color:white;margin:7px 0;
+}
+ul{padding-left:20px}
+li{padding:8px 0;border-bottom:1px solid #173449}
+.small{font-size:12px;color:#789eae}
+#response{min-height:45px;line-height:1.5}
 </style>
 </head>
+
 <body>
-<main>
-  <div id="status">SYSTEM ONLINE</div>
-  <h1>J.A.R.V.I.S.</h1>
-  <div class="reactor" id="reactor" aria-label="JARVIS sistem göstergesi"><div class="core"></div></div>
-  <div id="log" aria-live="polite">JARVIS hazır. Size nasıl yardımcı olabilirim?</div>
-  <p><input id="cmd" autocomplete="off" placeholder="Jarvis'e bir komut yaz..." aria-label="JARVIS komutu"></p>
-  <button id="sendBtn">GÖNDER</button>
-  <button id="listenBtn">🎙 KONUŞ</button>
-  <button id="helpBtn">KOMUTLAR</button>
 
-  <section class="panel">
-    <h2>GÖREVLERİM</h2>
-    <ol id="taskList"><li class="small">Henüz görev eklenmedi.</li></ol>
-    <div class="small">Örnek: “Görev ekle yarın bilgisayarı güncelle”</div>
-  </section>
-  <section class="panel">
-    <h2>JARVIS HAFIZASI</h2>
-    <ul id="memoryList"><li class="small">Henüz kaydedilmiş bilgi yok.</li></ul>
-    <div class="small">Örnek: “Hatırla en sevdiğim renk mavi”</div>
-  </section>
-  <div class="footer">MARK 2 · PERSONAL ASSISTANT</div>
-</main>
+<h1>J.A.R.V.I.S</h1>
+<div class="subtitle">JUST A RATHER VERY INTELLIGENT SYSTEM</div>
+
+<div class="reactor"><div class="core"></div></div>
+
+<div class="status" id="status">Sistem hazır, Efendim.</div>
+
+<div id="response">Size nasıl yardımcı olabilirim?</div>
+
+<div>
+<button class="primary" onclick="toggleWake()" id="wakeBtn">
+JARVIS UYANDIR
+</button>
+<button onclick="listenOnce()">🎙️ MİKROFON</button>
+<button class="stop" onclick="stopAll()">DİNLEMEYİ DURDUR</button>
+</div>
+
+<div class="panel">
+<h3>GÖREVLERİM</h3>
+<input id="taskInput" placeholder="Yeni görev yazın...">
+<button onclick="addTask()">GÖREV EKLE</button>
+<ul id="taskList"></ul>
+</div>
+
+<div class="panel">
+<h3>JARVIS HAFIZASI</h3>
+<input id="memoryInput" placeholder="Hatırlamamı istediğiniz bilgi...">
+<button onclick="saveMemory()">HAFIZAYA KAYDET</button>
+<ul id="memoryList"></ul>
+<button class="stop" onclick="clearMemory()">HAFIZAYI TEMİZLE</button>
+</div>
+
+<div class="panel">
+<h3>SİSTEM BİLGİSİ</h3>
+<div class="small">
+JARVIS MARK 3<br>
+Ses sistemi: Türkçe konuşma sentezi<br>
+Aktivasyon: Uyandırma kelimesi ve mikrofon<br>
+Hafıza: Cihaz içi kalıcı kayıt
+</div>
+</div>
+
 <script>
-const log=document.getElementById('log');
-const cmd=document.getElementById('cmd');
-const reactor=document.getElementById('reactor');
-const statusEl=document.getElementById('status');
-const taskListEl=document.getElementById('taskList');
-const memoryListEl=document.getElementById('memoryList');
+const TASK_KEY = "jarvis_tasks_v2";
+const MEMORY_KEY = "jarvis_memory_v2";
 
-const TASK_KEY='jarvis_tasks_v2';
-const MEMORY_KEY='jarvis_memory_v2';
-let tasks=loadJSON(TASK_KEY,[]);
-let memories=loadJSON(MEMORY_KEY,[]);
+let tasks = JSON.parse(localStorage.getItem(TASK_KEY) || "[]");
+let memories = JSON.parse(localStorage.getItem(MEMORY_KEY) || "[]");
 
-function loadJSON(key,fallback){
-  try{const v=JSON.parse(localStorage.getItem(key));return Array.isArray(v)?v:fallback;}
-  catch(e){return fallback;}
+const SpeechRecognition =
+ window.SpeechRecognition || window.webkitSpeechRecognition;
+
+let wakeRecognition = null;
+let oneRecognition = null;
+let wakeActive = false;
+let speaking = false;
+
+function status(text){
+ document.getElementById("status").textContent = text;
 }
-function saveJSON(key,value){
-  try{localStorage.setItem(key,JSON.stringify(value));return true;}
-  catch(e){return false;}
+
+function showResponse(text){
+ document.getElementById("response").textContent = text;
 }
-function normalize(s){return s.toLocaleLowerCase('tr-TR').replace(/[.!?]+$/,'').trim();}
+
+function saveTasks(){
+ localStorage.setItem(TASK_KEY,JSON.stringify(tasks));
+ renderTasks();
+}
+
+function saveMemories(){
+ localStorage.setItem(MEMORY_KEY,JSON.stringify(memories));
+ renderMemories();
+}
+
 function renderTasks(){
-  taskListEl.innerHTML='';
-  if(!tasks.length){taskListEl.innerHTML='<li class="small">Henüz görev eklenmedi.</li>';return;}
-  tasks.forEach((task,i)=>{
-    const li=document.createElement('li');
-    li.className=task.done?'done':'';
-    li.textContent=(i+1)+'. '+task.text+(task.done?' — tamamlandı':'');
-    taskListEl.appendChild(li);
-  });
+ const list=document.getElementById("taskList");
+ list.innerHTML="";
+ tasks.forEach((task,index)=>{
+  const li=document.createElement("li");
+  const label=document.createElement("span");
+  label.textContent=(task.done?"✓ ":"")+task.text;
+  if(task.done) label.style.textDecoration="line-through";
+
+  const btn=document.createElement("button");
+  btn.textContent=task.done?"Geri al":"Tamamla";
+  btn.onclick=()=>completeTask(index);
+
+  li.appendChild(label);
+  li.appendChild(btn);
+  list.appendChild(li);
+ });
 }
+
 function renderMemories(){
-  memoryListEl.innerHTML='';
-  if(!memories.length){memoryListEl.innerHTML='<li class="small">Henüz kaydedilmiş bilgi yok.</li>';return;}
-  memories.slice(-8).forEach((item)=>{
-    const li=document.createElement('li');li.textContent=item;memoryListEl.appendChild(li);
-  });
+ const list=document.getElementById("memoryList");
+ list.innerHTML="";
+ memories.forEach((memory,index)=>{
+  const li=document.createElement("li");
+  li.textContent=memory;
+
+  const btn=document.createElement("button");
+  btn.textContent="Sil";
+  btn.onclick=()=>{
+   memories.splice(index,1);
+   saveMemories();
+  };
+
+  li.appendChild(btn);
+  list.appendChild(li);
+ });
 }
-function speak(text){
-  log.textContent=text;
-  if(!('speechSynthesis' in window))return;
-  window.speechSynthesis.cancel();
-  const utterance=new SpeechSynthesisUtterance(text);
-  utterance.lang='tr-TR';utterance.rate=0.96;utterance.pitch=0.88;
-  const voices=window.speechSynthesis.getVoices();
-  const trVoices=voices.filter(v=>v.lang&&v.lang.toLowerCase().startsWith('tr'));
-  // Turkish male voices are not labeled consistently; prefer a voice whose name suggests a male voice.
-  const male=trVoices.find(v=>/male|erkek|ahmet|mehmet|cem|burak|tolga/i.test(v.name));
-  if(male)utterance.voice=male;else if(trVoices.length)utterance.voice=trVoices[0];
-  window.speechSynthesis.speak(utterance);
-}
+
 function addTask(text){
-  const clean=text.trim().replace(/^[\s:,-]+/,'');
-  if(!clean){speak('Eklemek istediğiniz görevi de söyleyin. Örneğin, görev ekle yarın alışveriş yap.');return;}
-  tasks.push({text:clean,done:false,createdAt:new Date().toISOString()});
-  const saved=saveJSON(TASK_KEY,tasks);renderTasks();
-  speak(saved?'Görev listenize eklendi: '+clean:'Görev eklendi ancak tarayıcı hafızasına kaydedilemedi.');
+ const input=document.getElementById("taskInput");
+ const value=(text || input.value).trim();
+ if(!value)return;
+
+ tasks.push({text:value,done:false});
+ saveTasks();
+ input.value="";
+ showResponse("Görev listenize eklendi, Efendim.");
+ if(text) speak("Görevinizi kaydettim, Efendim.");
 }
-function completeTask(n){
-  if(!tasks.length){speak('Tamamlanacak bir göreviniz yok.');return;}
-  const idx=Number(n)-1;
-  if(!Number.isInteger(idx)||idx<0||idx>=tasks.length){speak('Bu numarada bir görev bulamadım. Görevlerimi söyleyerek listeyi görebilirsiniz.');return;}
-  tasks[idx].done=true;saveJSON(TASK_KEY,tasks);renderTasks();
-  speak('Görev tamamlandı: '+tasks[idx].text);
+
+function completeTask(index){
+ if(!tasks[index])return;
+ tasks[index].done=!tasks[index].done;
+ saveTasks();
 }
-function handle(qOriginal){
-  const original=qOriginal.trim();
-  const q=normalize(original);
-  if(!q)return;
-  if(/^(yardım|komutlar|neler yapabilirsin)$/.test(q)||q.includes('hangi komut')){
-    speak('Saat, tarih, görev ekle, görevlerimi göster, görev tamamla 1, hatırla ve ne hatırlıyorsun komutlarını kullanabilirsiniz.');
-  }else if(q.includes('görev ekle')||q.includes('görev oluştur')||q.includes('listeye ekle')){
-    const m=original.match(/(?:görev(?:\s+ekle|\s+oluştur)|listeye\s+ekle)\s*[:,-]?\s*(.*)/i);
-    addTask(m?m[1]:'');
-  }else if(q.includes('görevlerimi')||q.includes('görev listesi')||q==='görevler'||q.includes('görevleri göster')){
-    const open=tasks.filter(t=>!t.done);
-    if(!tasks.length)speak('Henüz bir göreviniz yok. Görev ekle komutuyla yeni görev oluşturabilirsiniz.');
-    else if(!open.length)speak('Tüm görevleriniz tamamlanmış. Harika iş!');
-    else speak('Tamamlanmamış '+open.length+' göreviniz var: '+open.map((t,i)=>(i+1)+', '+t.text).join('. '));
-  }else if(q.includes('görev tamamla')||q.includes('görevi tamamla')){
-    const m=q.match(/(?:görev(?:i)?\s+tamamla)\s*(\d+)/);
-    completeTask(m?m[1]:NaN);
-  }else if(q.includes('tamamlanan görevleri sil')){
-    tasks=tasks.filter(t=>!t.done);saveJSON(TASK_KEY,tasks);renderTasks();speak('Tamamlanan görevler silindi.');
-  }else if(q.includes('tüm görevleri sil')||q.includes('görevleri temizle')){
-    tasks=[];saveJSON(TASK_KEY,tasks);renderTasks();speak('Tüm görevler silindi.');
-  }else if(q.startsWith('hatırla ')||q.startsWith('hafızaya kaydet ')){
-    const fact=original.replace(/^(hatırla|hafızaya kaydet)\s*/i,'').trim();
-    if(!fact){speak('Kaydetmemi istediğiniz bilgiyi söyleyin.');return;}
-    memories.push(fact);const saved=saveJSON(MEMORY_KEY,memories);renderMemories();
-    speak(saved?'Tamam, bunu bu cihazdaki JARVIS hafızasına kaydettim.':'Bilgiyi aldım ancak tarayıcı hafızasına kaydedemedim.');
-  }else if(q.includes('ne hatırlıyorsun')||q.includes('hafızam')||q.includes('hatırladıkların')){
-    speak(memories.length?'Hafızamda '+memories.length+' bilgi var: '+memories.slice(-5).join('. '):'Şu an hafızamda kayıtlı bilgi yok. Hatırla komutuyla bilgi kaydedebilirsiniz.');
-  }else if(q.startsWith('hafızayı temizle')||q.startsWith('tüm hafızayı sil')){
-    memories=[];saveJSON(MEMORY_KEY,memories);renderMemories();speak('Kaydedilmiş hafıza bilgileri silindi.');
-  }else if(q.includes('saat')){
-    speak('Şu an saat '+new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})+'.');
-  }else if(q.includes('tarih')||q.includes('bugün günlerden')){
-    speak('Bugünün tarihi '+new Date().toLocaleDateString('tr-TR',{weekday:'long',year:'numeric',month:'long',day:'numeric'})+'.');
-  }else if(q.includes('adın')){
-    speak('Ben JARVIS. Kişisel asistanınız.');
-  }else if(q.includes('nasılsın')){
-    speak('Tüm sistemler çalışır durumda. Size yardımcı olmaya hazırım.');
-  }else if(q.includes('merhaba')||q==='selam'){
-    speak('Merhaba. JARVIS sistemleri hazır.');
+
+function saveMemory(text){
+ const input=document.getElementById("memoryInput");
+ const value=(text || input.value).trim();
+ if(!value)return;
+
+ memories.push(value);
+ saveMemories();
+ input.value="";
+ showResponse("Bilgiyi hafızama kaydettim, Efendim.");
+ if(text) speak("Bunu hafızama kaydettim, Efendim.");
+}
+
+function clearMemory(){
+ if(!confirm("Bütün hafıza kayıtları silinsin mi?"))return;
+ memories=[];
+ saveMemories();
+ speak("Hafızam temizlendi, Efendim.");
+}
+
+function speak(text){
+ if(!("speechSynthesis" in window)){
+  showResponse(text);
+  return;
+ }
+
+ if(wakeRecognition){
+  try{wakeRecognition.abort()}catch(e){}
+ }
+ speaking=true;
+ showResponse(text);
+ status("JARVIS konuşuyor...");
+
+ speechSynthesis.cancel();
+
+ const utterance=new SpeechSynthesisUtterance(text);
+ utterance.lang="tr-TR";
+ utterance.rate=0.94;
+ utterance.pitch=0.88;
+ utterance.volume=1;
+
+ function chooseVoice(){
+  const voices=speechSynthesis.getVoices();
+  const turkish=voices.filter(v=>v.lang.toLowerCase().startsWith("tr"));
+  const male=turkish.find(v=>
+   /male|erkek|ahmet|mehmet|cem|burak|tolga/i.test(v.name)
+  );
+  if(male)utterance.voice=male;
+  else if(turkish.length)utterance.voice=turkish[0];
+ }
+
+ chooseVoice();
+
+ utterance.onend=()=>{
+  speaking=false;
+  if(wakeActive){
+   status("JARVIS sizi dinliyor...");
+   restartWake();
   }else{
-    speak('Komutunuzu aldım ancak bu ücretsiz sürümde henüz genel amaçlı yapay zekâ bağlantısı bulunmuyor. Desteklenen komutları görmek için komutlar diyebilirsiniz.');
+   status("Sistem hazır, Efendim.");
   }
+ };
+
+ utterance.onerror=()=>{
+  speaking=false;
+  if(wakeActive)restartWake();
+ };
+
+ speechSynthesis.speak(utterance);
 }
-function ask(){const value=cmd.value.trim();if(!value)return;cmd.value='';handle(value);}
-function listen(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){speak('Bu tarayıcı ses tanımayı desteklemiyor. Lütfen komutunuzu yazın.');return;}
-  const r=new SR();r.lang='tr-TR';r.interimResults=false;r.maxAlternatives=1;
-  reactor.classList.add('listening');statusEl.textContent='DİNLİYOR';
-  r.onresult=e=>{const transcript=e.results[0][0].transcript;cmd.value=transcript;ask();};
-  r.onerror=()=>{log.textContent='Mikrofon iznini ve internet bağlantısını kontrol edin.';};
-  r.onend=()=>{reactor.classList.remove('listening');statusEl.textContent='SYSTEM ONLINE';};
-  try{r.start();}catch(e){speak('Mikrofon şu anda kullanılamıyor. Birkaç saniye sonra tekrar deneyin.');}
+
+function normalize(text){
+ return text.toLocaleLowerCase("tr-TR")
+ .replace(/[.,!?]/g,"")
+ .trim();
 }
-document.getElementById('sendBtn').addEventListener('click',ask);
-document.getElementById('listenBtn').addEventListener('click',listen);
-document.getElementById('helpBtn').addEventListener('click',()=>speak('Komutlar: saat, tarih, görev ekle, görevlerimi göster, görev tamamla 1, hatırla en sevdiğim renk mavi, ne hatırlıyorsun.'));
-cmd.addEventListener('keydown',e=>{if(e.key==='Enter')ask();});
-renderTasks();renderMemories();
-if('speechSynthesis' in window){window.speechSynthesis.onvoiceschanged=()=>{};}
+
+function handleCommand(raw){
+ const command=normalize(raw);
+ if(!command)return;
+
+ if(command.includes("merhaba") || command.includes("selam")){
+  speak("Merhaba Efendim. Size nasıl yardımcı olabilirim?");
+  return;
+ }
+
+ if(command.includes("saat")){
+  speak("Şu an saat "+new Date().toLocaleTimeString("tr-TR",{
+   hour:"2-digit",minute:"2-digit"
+  })+", Efendim.");
+  return;
+ }
+
+ if(command.includes("tarih")){
+  speak("Bugünün tarihi "+new Date().toLocaleDateString("tr-TR")+", Efendim.");
+  return;
+ }
+
+ if(command.includes("adın ne") || command.includes("kimsin")){
+  speak("Ben JARVIS. Kişisel yapay zeka asistanınızım, Efendim.");
+  return;
+ }
+
+ if(command.includes("nasılsın")){
+  speak("Sistemlerim sorunsuz çalışıyor. Teşekkür ederim, Efendim.");
+  return;
+ }
+
+ if(command.startsWith("hatırla ")){
+  saveMemory(raw.substring(raw.toLocaleLowerCase("tr-TR").indexOf("hatırla")+7).trim());
+  return;
+ }
+
+ if(command.includes("ne hatırlıyorsun") || command.includes("hafızanda ne var")){
+  if(!memories.length){
+   speak("Henüz kayıtlı bir bilgim yok, Efendim.");
+  }else{
+   speak("Hatırladığım bilgiler: "+memories.join(". "));
+  }
+  return;
+ }
+
+ if(command.startsWith("görev ekle ")){
+  addTask(raw.substring(raw.toLocaleLowerCase("tr-TR").indexOf("görev ekle")+11).trim());
+  return;
+ }
+
+ if(command.includes("görevlerimi göster") || command.includes("görevlerim")){
+  if(!tasks.length){
+   speak("Görev listeniz boş, Efendim.");
+  }else{
+   speak("Görevleriniz: "+tasks.map((t,i)=>
+    (i+1)+". "+t.text+(t.done?" tamamlandı":"")
+   ).join(". "));
+  }
+  return;
+ }
+
+ if(command.startsWith("görev tamamla ")){
+  const number=parseInt(command.replace("görev tamamla ",""),10);
+  if(number>0 && tasks[number-1]){
+   tasks[number-1].done=true;
+   saveTasks();
+   speak("Görev tamamlandı, Efendim.");
+  }else speak("Bu numarada bir görev bulamadım.");
+  return;
+ }
+
+ if(command.includes("tamamlanan görevleri sil")){
+  tasks=tasks.filter(t=>!t.done);
+  saveTasks();
+  speak("Tamamlanan görevleri sildim, Efendim.");
+  return;
+ }
+
+ if(command.includes("tüm görevleri sil")){
+  if(confirm("Bütün görevler silinsin mi?")){
+   tasks=[];
+   saveTasks();
+   speak("Görev listenizi temizledim, Efendim.");
+  }
+  return;
+ }
+
+ if(command.includes("yardım")){
+  speak("Saat, tarih, hafıza ve görev komutlarını kullanabilirsiniz, Efendim.");
+  return;
+ }
+
+ speak("Bu komutu henüz öğrenmedim, Efendim.");
+}
+
+function listenOnce(){
+ if(!SpeechRecognition){
+  speak("Bu tarayıcı ses tanımayı desteklemiyor.");
+  return;
+ }
+
+ if(oneRecognition){
+  try{oneRecognition.abort()}catch(e){}
+ }
+
+ oneRecognition=new SpeechRecognition();
+ oneRecognition.lang="tr-TR";
+ oneRecognition.continuous=false;
+ oneRecognition.interimResults=false;
+
+ oneRecognition.onstart=()=>status("Sizi dinliyorum, Efendim...");
+ oneRecognition.onresult=(event)=>{
+  const text=event.results[0][0].transcript;
+  handleCommand(text);
+ };
+ oneRecognition.onerror=()=>{
+  status("Mikrofon kullanılamadı. İzinleri kontrol edin.");
+ };
+ oneRecognition.onend=()=>{
+  if(!wakeActive && !speaking)status("Sistem hazır, Efendim.");
+ };
+
+ try{oneRecognition.start()}
+ catch(e){status("Mikrofon başlatılamadı.");}
+}
+
+function createWakeRecognition(){
+ if(!SpeechRecognition)return null;
+
+ const recognition=new SpeechRecognition();
+ recognition.lang="tr-TR";
+ recognition.continuous=true;
+ recognition.interimResults=false;
+
+ recognition.onstart=()=>{
+  status("JARVIS uyandırma kelimesini bekliyor...");
+ };
+
+ recognition.onresult=(event)=>{
+  for(let i=event.resultIndex;i<event.results.length;i++){
+   if(!event.results[i].isFinal)continue;
+
+   const text=event.results[i][0].transcript.trim();
+   const match=text.match(/jarvis[\s,.:;!?-]*(.*)/i);
+
+   if(match){
+    const command=match[1].trim();
+    if(command){
+     handleCommand(command);
+    }else{
+     speak("Buyurun Efendim, sizi dinliyorum.");
+    }
+   }
+  }
+ };
+
+ recognition.onerror=(event)=>{
+  if(event.error==="not-allowed"){
+   wakeActive=false;
+   status("Mikrofon izni gerekli.");
+  }
+ };
+
+ recognition.onend=()=>{
+  if(wakeActive && !speaking){
+   setTimeout(restartWake,800);
+  }
+ };
+
+ return recognition;
+}
+
+function restartWake(){
+ if(!wakeActive || speaking)return;
+
+ if(!wakeRecognition){
+  wakeRecognition=createWakeRecognition();
+ }
+ if(!wakeRecognition)return;
+
+ try{wakeRecognition.start()}
+ catch(e){}
+}
+
+function toggleWake(){
+ if(!SpeechRecognition){
+  speak("Tarayıcınız uyandırma kelimesi özelliğini desteklemiyor.");
+  return;
+ }
+
+ if(wakeActive){
+  stopAll();
+  return;
+ }
+
+ wakeActive=true;
+ document.getElementById("wakeBtn").textContent="JARVIS AKTİF";
+ wakeRecognition=createWakeRecognition();
+ restartWake();
+}
+
+function stopAll(){
+ wakeActive=false;
+ if(wakeRecognition){
+  try{wakeRecognition.abort()}catch(e){}
+ }
+ if(oneRecognition){
+  try{oneRecognition.abort()}catch(e){}
+ }
+ if(speechSynthesis)speechSynthesis.cancel();
+
+ speaking=false;
+ document.getElementById("wakeBtn").textContent="JARVIS UYANDIR";
+ status("Dinleme durduruldu, Efendim.");
+}
+
+renderTasks();
+renderMemories();
+
+if("speechSynthesis" in window){
+ speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();
+}
 </script>
 </body>
 </html>
