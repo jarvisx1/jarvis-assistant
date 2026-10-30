@@ -199,30 +199,21 @@ function completeTask(index){
 
 function saveMemory(text){
  const input=document.getElementById("memoryInput");
- const value=(text || input.value).trim();
+ const value=(text || input.value || "").trim();
 
- if(!value)return;
-
- const clean = value.toLocaleLowerCase("tr-TR")
-  .replace(/[.,!?;:]/g,"")
-  .replace(/\s+/g," ")
-  .trim();
-
- const exists = memories.some(item =>
-  item.toLocaleLowerCase("tr-TR")
-   .replace(/[.,!?;:]/g,"")
-   .replace(/\s+/g," ")
-   .trim() === clean
- );
-
- if(exists){
-  const cevap="Efendim, bu bilgi zaten hafızamda kayıtlı.";
-  showResponse(cevap);
-  speak(cevap);
-  input.value="";
+ if(!value){
+  speak("Efendim, kaydedilecek bilgi boş.");
   return;
  }
 
+ memories.push(value);
+ saveMemories();
+ if(input) input.value="";
+
+ const cevap="Efendim, "+value+" bilgisini hafızama kaydettim.";
+ showResponse(cevap);
+ speak(cevap);
+}
  memories.push(value);
  saveMemories();
  input.value="";
