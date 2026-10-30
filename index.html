@@ -205,10 +205,11 @@ function saveMemory(text){
  memories.push(value);
  saveMemories();
  input.value="";
- showResponse("Bilgiyi hafızama kaydettim, Efendim.");
- if(text) speak("Bunu hafızama kaydettim, Efendim.");
-}
 
+ const cevap="Elbette Efendim. "+value+" bilgisini hafızama kaydettim.";
+ showResponse(cevap);
+ speak(cevap);
+}
 function clearMemory(){
  if(!confirm("Bütün hafıza kayıtları silinsin mi?"))return;
  memories=[];
